@@ -38,6 +38,11 @@ public:
     template <typename T>
     Collection<T>* collection(const char* name)
     {
+        if (!_initialized)
+        {
+            Serial.println("[DB] Cannot get collection: Database not initialized");
+            return nullptr;
+        }
         // Note: Type safety is user's responsibility
         // Always use the same T for a given collection name
         auto it = _collections.find(name);

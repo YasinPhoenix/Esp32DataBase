@@ -20,8 +20,25 @@ bool Database::begin()
 {
     if (!LittleFS.begin())
     {
-        Serial.println("[DB] Failed to initialize LittleFS!");
-        return false;
+        Serial.println("[DB] Failed to initialize LittleFS! Attempting format and retry...");
+
+        // Try to format the filesystem and mount again. Some boards/partitions
+        // may contain corrupted metadata (seen as "Corrupted dir pair") and
+        // require a format on first use.
+        if (!LittleFS.format())
+        {
+            Serial.println("[DB] LittleFS format failed!");
+            return false;
+        }
+
+        delay(50);
+
+        if (!LittleFS.begin())
+        {
+            Serial.println("[DB] LittleFS mount failed after format!");
+            return false;
+        }
+        Serial.println("[DB] LittleFS formatted and mounted successfully");
     }
 
     // Create database root directory
